@@ -12,7 +12,7 @@ export TF_NEED_GCP=${TF_NEED_GCP:-0}
 export TF_NEED_HDFS=${TF_NEED_HDFS:-0}
 export TF_NEED_OPENCL=${TF_NEED_OPENCL:-0}
 export TF_NEED_OPENCL_SYCL=${TF_NEED_OPENCL_SYCL:-0}
-export TF_NEED_TENSORRT=${TF_NEED_TENSORRT:-0}
+export TF_NEED_TENSORRT=${TF_NEED_TENSORRT:-1}
 export TF_NEED_NGRAPH=${TF_NEED_NGRAPH:-0}
 export TF_NEED_JEMALLOC=${TF_NEED_JEMALLOC:-1}
 export TF_NEED_VERBS=${TF_NEED_VERBS:-0}
@@ -37,7 +37,7 @@ if [ "@ALLOW_CUDA@" = "ON" ] && hash nvcc 2>/dev/null; then
     echo "CUDA support enabled"
     cuda_config_opts="--config=cuda"
     export TF_NEED_CUDA=1
-    export TF_CUDA_COMPUTE_CAPABILITIES=${TF_CUDA_COMPUTE_CAPABILITIES:-"3.5,7.0"}  # default from configure.py
+    export TF_CUDA_COMPUTE_CAPABILITIES=${TF_CUDA_COMPUTE_CAPABILITIES:-"6.2"}  # default from configure.py
     export TF_CUDA_PATHS=${TF_CUDA_PATHS:-"/opt/cuda,/usr/local/cuda,/usr/local,/usr/cuda,/usr"}
     export TF_CUDA_VERSION="$(nvcc --version | sed -n 's/^.*release \(.*\),.*/\1/p')"
     export TF_NCCL_VERSION="$(find / -name 'libnccl.so.*' | tail -n1 | sed -r 's/^.*\.so\.//')"
@@ -77,6 +77,8 @@ fi
 ./configure
 bazel build --config=opt \
             --config=monolithic \
+	    --config=nonccl \
+	    --verbose_failures \
             $cuda_config_opts \
             tensorflow:libtensorflow_cc.so
 bazel shutdown
